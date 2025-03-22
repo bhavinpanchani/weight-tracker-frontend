@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 20px;
+        }
+
+        /* Container for Equal Width */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 600px; /* Expands on larger screens */
+            margin: 0 auto;
+        }
+
+        /* Common Card Styling */
+        .card {
+            width: 100%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+        }
+
+        /* Form Styling (Inside Card) */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 95%;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+        }
+
+        /* Mobile Responsive: Smaller Cards */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 400px; /* Reduce max width for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📊 Weight Tracker</h2>
+
+    <div class="container">
+        <!-- Chart Card -->
+        <div class="card chart-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+
+        <!-- Form Card -->
+        <div class="card">
+            <form id="weightForm">
+                <input type="number" step="0.001" name="my_weight" placeholder="Bhavin's Weight (kg)" required>
+                <input type="number" step="0.001" name="wife_weight" placeholder="Ridham's Weight (kg)" required>
+                <button type="submit">➕ Add Weight</button>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card">
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>My Weight (kg)</th>
+                    <th>Wife's Weight (kg)</th>
+                </tr>
+                <tbody id="weightTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let weightChartInstance = null; // Store the chart instance globally
+
+        async function fetchAndUpdate() {
+            const response = await fetch('http://localhost:8080/api/weights');
+            const data = await response.json();
+
+            // Update Table
+            const table = document.getElementById('weightTable');
+            table.innerHTML = '';
+            data.forEach(row => {
+                const tr = `<tr><td>${row.date}</td><td>${row.myWeight} kg</td><td>${row.wifeWeight} kg</td></tr>`;
+                table.innerHTML += tr;
+            });
+
+            // Update Graph
+            const dates = data.map(d => d.date);
+            const myWeights = data.map(d => d.myWeight);
+            const wifeWeights = data.map(d => d.wifeWeight);
+
+            const ctx = document.getElementById('weightChart').getContext('2d');
+
+            // ✅ Destroy existing chart before creating a new one
+            if (weightChartInstance) {
+                weightChartInstance.destroy();
+            }
+
+            weightChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        { 
+                            label: "Bhavin's Weight", 
+                            data: myWeights, 
+                            borderColor: "#007bff", 
+                            backgroundColor: "rgba(0,123,255,0.1)", 
+                            fill: true 
+                        },
+                        { 
+                            label: "Ridham's Weight", 
+                            data: wifeWeights, 
+                            borderColor: "#dc3545", 
+                            backgroundColor: "rgba(220,53,69,0.1)", 
+                            fill: true 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+        }
+
+        document.getElementById('weightForm').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            myWeight: parseFloat(this.my_weight.value),
+            wifeWeight: parseFloat(this.wife_weight.value)
+        };
+
+        await fetch('http://localhost:8080/api/weights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        this.reset();
+        fetchAndUpdate();
+        };
+
+        // Fetch data on page load
+        fetchAndUpdate();
+
+    </script>
+
+</body>
+</html>
