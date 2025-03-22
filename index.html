@@ -93,6 +93,31 @@
             width: 100%;
         }
 
+        /* Updated Date Picker Styling */
+        input[type="date"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #fff;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        input[type="date"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: opacity(50%);
+            cursor: pointer;
+        }
+
         /* Mobile Responsive: Smaller Cards */
         @media (max-width: 768px) {
             .container {
