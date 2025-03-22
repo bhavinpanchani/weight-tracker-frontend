@@ -135,9 +135,10 @@
 
     <script>
         let weightChartInstance = null; // Store the chart instance globally
+        let baseURL = 'https://weight-tracker-backend-sfzg.onrender.com'
 
         async function fetchAndUpdate() {
-            const response = await fetch('http://localhost:8080/api/weights');
+            const response = await fetch(`${baseURL}/api/weights`);
             const data = await response.json();
 
             // Update Table
@@ -196,7 +197,7 @@
             wifeWeight: parseFloat(this.wife_weight.value)
         };
 
-        await fetch('http://localhost:8080/api/weights', {
+        await fetch(`${baseURL}/api/weights`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
