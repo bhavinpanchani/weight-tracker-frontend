@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rivin's Weight Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Include Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- Include Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    
     <style>
         /* General Page Styling */
         body {
@@ -170,11 +165,6 @@
     </div>
 
     <script>
-        // Initialize Flatpickr on the input element
-        flatpickr("#datePicker", {
-            dateFormat: "Y-m-d", // Custom date format
-            allowInput: true, // Allows manual input
-        });
 
         // Set the default value of the date input to today's date
         document.addEventListener("DOMContentLoaded", function () {
