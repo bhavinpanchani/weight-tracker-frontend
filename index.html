@@ -254,9 +254,13 @@
         const table = document.getElementById('weightTable');
         table.innerHTML = '';
         data.forEach(row => {
+            const [year, month, day] = row.date.split("-").map(Number);
+            const dateObj = new Date(year, month - 1, day); // Explicitly set local date
+            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+
             const tr = `
                 <tr>
-                    <td>${row.date}</td>
+                    <td>${formattedDate}</td>
                     <td>${row.myWeight} kg</td>
                     <td>${row.wifeWeight} kg</td>
                     <td><button onclick="deleteWeight(${row.id})" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
@@ -266,7 +270,10 @@
         });
 
         // Update Graph
-        const dates = data.map(d => d.date).reverse();
+        const dates = data.map(d => {
+            let dateObj = new Date(d.date + "T00:00:00"); // Ensures the local timezone is used
+            return dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+        }).reverse();
         const myWeights = data.map(d => d.myWeight).reverse();
         const wifeWeights = data.map(d => d.wifeWeight).reverse();
 
