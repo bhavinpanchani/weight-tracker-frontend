@@ -93,6 +93,10 @@
             width: 100%;
         }
 
+        #weightChart{
+            height: 50vh;
+        }
+
         /* Updated Date Picker Styling */
         input[type="date"] {
             width: 90%;
@@ -214,8 +218,8 @@
             <table>
                 <tr>
                     <th>Date</th>
-                    <th>My Weight (kg)</th>
-                    <th>Wife's Weight (kg)</th>
+                    <th>Bhavin's Weight (kg)</th>
+                    <th>Ridham's Weight (kg)</th>
                     <th>Delete</th>
                 </tr>
                 <tbody id="weightTable"></tbody>
@@ -276,7 +280,7 @@
                         { label: "Ridham's Weight", data: wifeWeights, borderColor: "#dc3545", backgroundColor: "rgba(220,53,69,0.1)", fill: true }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: true }
+                options: { responsive: true, maintainAspectRatio: false }
             });
 
             // Calculate weekly and day one progress
