@@ -118,10 +118,62 @@
             cursor: pointer;
         }
 
+        /* Progress Cards Styling */
+        .progress-card {
+            width: 100%;
+            background: #fff;
+            border-radius: 15px;  /* Rounded corners for smoother look */
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .progress-card h3 {
+            font-size: 22px;
+            color: #333;
+            margin-top: -5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-transform: uppercase; /* Capitalize the header for a modern look */
+        }
+
+        .progress-text {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .progress-text span {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        #weeklyProgress, #dayOneProgress {
+            /* padding: 10px; */
+            font-size: 18px;
+            /* background: #f7f7f7; */
+            /* border-radius: 10px; */
+            margin-top: 10px;
+            color: #555;
+        }
+
+        #weeklyProgress span, #dayOneProgress span {
+            font-weight: bold;
+            color: #28a745;
+        }
+
         /* Mobile Responsive: Smaller Cards */
         @media (max-width: 768px) {
             .container {
                 max-width: 400px; /* Reduce max width for mobile */
+            }
+            .progress-card {
+                padding: 20px;  /* Reduce padding for smaller screens */
+            }
+            .progress-card h3 {
+                font-size: 20px;  /* Adjust header size on mobile */
             }
         }
     </style>
@@ -146,6 +198,17 @@
             </form>
         </div>
 
+        <!-- Weekly & Progress Cards -->
+        <div class="progress-card">
+            <h3>Weekly Progress</h3>
+            <div id="weeklyProgress"></div>
+        </div>
+
+        <div class="progress-card">
+            <h3>Progress from Day One</h3>
+            <div id="dayOneProgress"></div>
+        </div>
+
         <!-- Table Card -->
         <div class="card">
             <table>
@@ -161,11 +224,11 @@
     </div>
 
     <script>
-
         // Set the default value of the date input to today's date
         document.addEventListener("DOMContentLoaded", function () {
-            const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-            document.getElementById("datePicker").value = today;
+            const today = new Date();
+            const localDate = today.toLocaleDateString('en-CA'); // Formats the date in YYYY-MM-DD format for local timezone
+            document.getElementById("datePicker").value = localDate;
         });
 
         let weightChartInstance = null; // Store the chart instance globally
@@ -215,6 +278,74 @@
                 },
                 options: { responsive: true, maintainAspectRatio: true }
             });
+
+            // Calculate weekly and day one progress
+            calculateProgress(data);
+        }
+
+        function calculateProgress(data) {
+            // Progress from Day One (Initial Weight)
+            const firstEntry = data[0];
+            const latestEntry = data[data.length - 1];
+            
+            // Calculate progress
+            const dayOneProgress = {
+                bhavinProgress: (latestEntry.myWeight - firstEntry.myWeight).toFixed(3),
+                ridhamProgress: (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3),
+            };
+
+            // Show + or - based on weight gain/loss
+            const bhavinSign = dayOneProgress.bhavinProgress >= 0 ? `+${dayOneProgress.bhavinProgress}` : `${dayOneProgress.bhavinProgress}`;
+            const ridhamSign = dayOneProgress.ridhamProgress >= 0 ? `+${dayOneProgress.ridhamProgress}` : `${dayOneProgress.ridhamProgress}`;
+
+            // Apply background color based on positive or negative progress
+            const bhavinBackgroundColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+            const ridhamBackgroundColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+
+            document.getElementById("dayOneProgress").innerHTML = `
+                <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                    Bhavin's progress: ${bhavinSign} kg
+                </div>
+                <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                    Ridham's progress: ${ridhamSign} kg
+                </div>
+            `;
+
+            // Weekly Progress (rough approximation: last 7 days)
+            const lastWeekData = data.filter(d => {
+                const diff = (new Date() - new Date(d.date)) / (1000 * 3600 * 24); // in days
+                return diff <= 7;
+            });
+
+            if (lastWeekData.length > 1) {
+                const weekStart = lastWeekData[0];
+                const weekEnd = lastWeekData[lastWeekData.length - 1];
+                
+                // Weekly progress calculation
+                const weeklyProgress = {
+                    bhavin: (weekEnd.myWeight - weekStart.myWeight).toFixed(3),
+                    ridham: (weekEnd.wifeWeight - weekStart.wifeWeight).toFixed(3),
+                };
+
+                // Show + or - for weekly progress
+                const bhavinWeeklySign = weeklyProgress.bhavin >= 0 ? `+${weeklyProgress.bhavin}` : `${weeklyProgress.bhavin}`;
+                const ridhamWeeklySign = weeklyProgress.ridham >= 0 ? `+${weeklyProgress.ridham}` : `${weeklyProgress.ridham}`;
+
+                // Apply background color based on positive or negative progress
+                const bhavinWeeklyBackgroundColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+                const ridhamWeeklyBackgroundColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+
+                document.getElementById("weeklyProgress").innerHTML = `
+                    <div style="background-color:${bhavinWeeklyBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                        Bhavin's weekly progress: ${bhavinWeeklySign} kg
+                    </div>
+                    <div style="background-color:${ridhamWeeklyBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                        Ridham's weekly progress: ${ridhamWeeklySign} kg
+                    </div>
+                `;
+            } else {
+                document.getElementById("weeklyProgress").innerHTML = `Insufficient data for weekly progress.`;
+            }
         }
 
         document.getElementById('weightForm').onsubmit = async function(e) {
@@ -233,6 +364,10 @@
             });
 
             this.reset();
+            const today = new Date();
+            const localDate = today.toLocaleDateString('en-CA'); // Formats the date in YYYY-MM-DD format for local timezone
+            document.getElementById("datePicker").value = localDate;
+
             fetchAndUpdate();
         };
 
