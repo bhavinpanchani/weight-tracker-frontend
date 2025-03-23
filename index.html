@@ -351,14 +351,14 @@
         };
 
         // Apply background color based on positive or negative progress
-        const bhavinBackgroundColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-        const ridhamBackgroundColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+        const bhavinDayOneColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';
+        const ridhamDayOneColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';
 
         document.getElementById("dayOneProgress").innerHTML = `
-            <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+            <div style="background-color:${bhavinDayOneColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
                 Bhavin: ${formatProgress(dayOneProgress.bhavinProgress)} kg
             </div>
-            <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+            <div style="background-color:${ridhamDayOneColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
                 Ridham: ${formatProgress(dayOneProgress.ridhamProgress)} kg
             </div>
         `;
@@ -382,11 +382,14 @@
                     : "N/A",
             };
 
+            const bhavinWeeklyColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';
+            const ridhamWeeklyColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';
+
             document.getElementById("weeklyProgress").innerHTML = `
-                <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                <div style="background-color:${bhavinWeeklyColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
                     Bhavin: ${formatProgress(weeklyProgress.bhavin)} kg
                 </div>
-                <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                <div style="background-color:${ridhamWeeklyColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
                     Ridham: ${formatProgress(weeklyProgress.ridham)} kg
                 </div>
             `;
