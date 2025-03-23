@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rivin's Weight Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
         /* General Page Styling */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: "Roboto", sans-serif;
             background-color: #f4f4f4;
             text-align: center;
             margin: 20px;
@@ -219,8 +223,8 @@
             <table>
                 <tr>
                     <th>Date</th>
-                    <th>Bhavin's Weight (kg)</th>
-                    <th>Ridham's Weight (kg)</th>
+                    <th>Bhavin's Weight</th>
+                    <th>Ridham's Weight</th>
                     <th>Delete</th>
                 </tr>
                 <tbody id="weightTable"></tbody>
@@ -240,118 +244,124 @@
         let baseURL = 'https://weight-tracker-backend-sfzg.onrender.com'
 
         async function fetchAndUpdate() {
-            const response = await fetch(`${baseURL}/api/weights`);
-            const data = await response.json();
+        const response = await fetch(`${baseURL}/api/weights`);
+        const data = await response.json();
 
-            // ✅ Sort by date (oldest to newest)
-            data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        // ✅ Sort by date (newest to oldest)
+        data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            // Update Table
-            const table = document.getElementById('weightTable');
-            table.innerHTML = '';
-            data.forEach(row => {
-                const tr = `
-                    <tr>
-                        <td>${row.date}</td>
-                        <td>${row.myWeight} kg</td>
-                        <td>${row.wifeWeight} kg</td>
-                        <td><button onclick="deleteWeight(${row.id})" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
-                    </tr>
-                `;
-                table.innerHTML += tr;
-            });
+        // Update Table
+        const table = document.getElementById('weightTable');
+        table.innerHTML = '';
+        data.forEach(row => {
+            const tr = `
+                <tr>
+                    <td>${row.date}</td>
+                    <td>${row.myWeight} kg</td>
+                    <td>${row.wifeWeight} kg</td>
+                    <td><button onclick="deleteWeight(${row.id})" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
+                </tr>
+            `;
+            table.innerHTML += tr;
+        });
 
-            // Update Graph
-            const dates = data.map(d => d.date);
-            const myWeights = data.map(d => d.myWeight);
-            const wifeWeights = data.map(d => d.wifeWeight);
+        // Update Graph
+        const dates = data.map(d => d.date).reverse();
+        const myWeights = data.map(d => d.myWeight).reverse();
+        const wifeWeights = data.map(d => d.wifeWeight).reverse();
 
-            const ctx = document.getElementById('weightChart').getContext('2d');
+        const ctx = document.getElementById('weightChart').getContext('2d');
 
-            if (weightChartInstance) {
-                weightChartInstance.destroy();
-            }
-
-            weightChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [
-                        { label: "Bhavin's Weight", data: myWeights, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.1)", fill: true },
-                        { label: "Ridham's Weight", data: wifeWeights, borderColor: "#dc3545", backgroundColor: "rgba(220,53,69,0.1)", fill: true }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            // Calculate weekly and day one progress
-            calculateProgress(data);
+        if (weightChartInstance) {
+            weightChartInstance.destroy();
         }
 
-        function calculateProgress(data) {
-            // Progress from Day One (Initial Weight)
-            const firstEntry = data[0];
-            const latestEntry = data[data.length - 1];
+        weightChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    { label: "Bhavin's Weight", data: myWeights, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.1)", fill: true },
+                    { label: "Ridham's Weight", data: wifeWeights, borderColor: "#dc3545", backgroundColor: "rgba(220,53,69,0.1)", fill: true }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Calculate weekly and day one progress
+        calculateProgress(data);
+    }
+
+    function calculateProgress(data) {
+        if (data.length === 0) {
+            document.getElementById("dayOneProgress").innerHTML = "No data available.";
+            document.getElementById("weeklyProgress").innerHTML = "No data available.";
+            return;  // Prevent further execution if no data is available
+        }
+
+        // Since data is now sorted newest to oldest, we need to swap our references
+        const latestEntry = data[0];  // Newest entry
+        const firstEntry = data[data.length - 1];  // Oldest entry
+
+        // Calculate progress
+        const dayOneProgress = {
+            bhavinProgress: (latestEntry.myWeight - firstEntry.myWeight).toFixed(3),
+            ridhamProgress: (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3),
+        };
+
+        // Show + or - based on weight gain/loss
+        const bhavinSign = dayOneProgress.bhavinProgress >= 0 ? `+${dayOneProgress.bhavinProgress}` : `${dayOneProgress.bhavinProgress}`;
+        const ridhamSign = dayOneProgress.ridhamProgress >= 0 ? `+${dayOneProgress.ridhamProgress}` : `${dayOneProgress.ridhamProgress}`;
+
+        // Apply background color based on positive or negative progress
+        const bhavinBackgroundColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+        const ridhamBackgroundColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+
+        document.getElementById("dayOneProgress").innerHTML = `
+            <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                Bhavin's progress: ${bhavinSign} kg
+            </div>
+            <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                Ridham's progress: ${ridhamSign} kg
+            </div>
+        `;
+
+        // Weekly Progress (last 7 days)
+        const lastWeekData = data.filter(d => {
+            const diff = (new Date() - new Date(d.date)) / (1000 * 3600 * 24); // in days
+            return diff <= 7;
+        });
+
+        if (lastWeekData.length > 1) {
+            const weekEnd = lastWeekData[0]; // Newest within the last 7 days
+            const weekStart = lastWeekData[lastWeekData.length - 1]; // Oldest within the last 7 days
             
-            // Calculate progress
-            const dayOneProgress = {
-                bhavinProgress: (latestEntry.myWeight - firstEntry.myWeight).toFixed(3),
-                ridhamProgress: (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3),
+            // Weekly progress calculation
+            const weeklyProgress = {
+                bhavin: (weekEnd.myWeight - weekStart.myWeight).toFixed(3),
+                ridham: (weekEnd.wifeWeight - weekStart.wifeWeight).toFixed(3),
             };
 
-            // Show + or - based on weight gain/loss
-            const bhavinSign = dayOneProgress.bhavinProgress >= 0 ? `+${dayOneProgress.bhavinProgress}` : `${dayOneProgress.bhavinProgress}`;
-            const ridhamSign = dayOneProgress.ridhamProgress >= 0 ? `+${dayOneProgress.ridhamProgress}` : `${dayOneProgress.ridhamProgress}`;
+            // Show + or - for weekly progress
+            const bhavinWeeklySign = weeklyProgress.bhavin >= 0 ? `+${weeklyProgress.bhavin}` : `${weeklyProgress.bhavin}`;
+            const ridhamWeeklySign = weeklyProgress.ridham >= 0 ? `+${weeklyProgress.ridham}` : `${weeklyProgress.ridham}`;
 
             // Apply background color based on positive or negative progress
-            const bhavinBackgroundColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-            const ridhamBackgroundColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+            const bhavinWeeklyBackgroundColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
+            const ridhamWeeklyBackgroundColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
 
-            document.getElementById("dayOneProgress").innerHTML = `
-                <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                    Bhavin's progress: ${bhavinSign} kg
+            document.getElementById("weeklyProgress").innerHTML = `
+                <div style="background-color:${bhavinWeeklyBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                    Bhavin's weekly progress: ${bhavinWeeklySign} kg
                 </div>
-                <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                    Ridham's progress: ${ridhamSign} kg
+                <div style="background-color:${ridhamWeeklyBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                    Ridham's weekly progress: ${ridhamWeeklySign} kg
                 </div>
             `;
-
-            // Weekly Progress (rough approximation: last 7 days)
-            const lastWeekData = data.filter(d => {
-                const diff = (new Date() - new Date(d.date)) / (1000 * 3600 * 24); // in days
-                return diff <= 7;
-            });
-
-            if (lastWeekData.length > 1) {
-                const weekStart = lastWeekData[0];
-                const weekEnd = lastWeekData[lastWeekData.length - 1];
-                
-                // Weekly progress calculation
-                const weeklyProgress = {
-                    bhavin: (weekEnd.myWeight - weekStart.myWeight).toFixed(3),
-                    ridham: (weekEnd.wifeWeight - weekStart.wifeWeight).toFixed(3),
-                };
-
-                // Show + or - for weekly progress
-                const bhavinWeeklySign = weeklyProgress.bhavin >= 0 ? `+${weeklyProgress.bhavin}` : `${weeklyProgress.bhavin}`;
-                const ridhamWeeklySign = weeklyProgress.ridham >= 0 ? `+${weeklyProgress.ridham}` : `${weeklyProgress.ridham}`;
-
-                // Apply background color based on positive or negative progress
-                const bhavinWeeklyBackgroundColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-                const ridhamWeeklyBackgroundColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-
-                document.getElementById("weeklyProgress").innerHTML = `
-                    <div style="background-color:${bhavinWeeklyBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                        Bhavin's weekly progress: ${bhavinWeeklySign} kg
-                    </div>
-                    <div style="background-color:${ridhamWeeklyBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                        Ridham's weekly progress: ${ridhamWeeklySign} kg
-                    </div>
-                `;
-            } else {
-                document.getElementById("weeklyProgress").innerHTML = `Insufficient data for weekly progress.`;
-            }
+        } else {
+            document.getElementById("weeklyProgress").innerHTML = `Insufficient data for weekly progress.`;
         }
+    }
 
         document.getElementById('weightForm').onsubmit = async function(e) {
             e.preventDefault();
