@@ -261,12 +261,15 @@
             const dateObj = new Date(year, month - 1, day); // Explicitly set local date
             const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 
+            const myWeight = row.myWeight !== null ? row.myWeight : "–";
+            const wifeWeight = row.wifeWeight !== null ? row.wifeWeight : "–";
+
             const tr = `
                 <tr>
                     <td>${formattedDate}</td>
-                    <td>${row.myWeight}</td>
-                    <td>${row.wifeWeight}</td>
-                    <td><button onclick="deleteWeight(${row.id})" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
+                    <td>${myWeight}</td>
+                    <td>${wifeWeight}</td>
+                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
                 </tr>
             `;
             table.innerHTML += tr;
@@ -306,22 +309,46 @@
         if (data.length === 0) {
             document.getElementById("dayOneProgress").innerHTML = "No data available.";
             document.getElementById("weeklyProgress").innerHTML = "No data available.";
-            return;  // Prevent further execution if no data is available
+            return;
         }
 
-        // Since data is now sorted newest to oldest, we need to swap our references
-        const latestEntry = data[0];  // Newest entry
-        const firstEntry = data[data.length - 1];  // Oldest entry
+        function findValidWeight(entry, key) {
+            return entry[key] !== null ? entry[key] : null;
+        }
 
-        // Calculate progress
+        function formatProgress(value) {
+            if (isNaN(value) || value === null || value === "N/A") return "N/A"; 
+            return value >= 0 ? `+${parseFloat(value).toFixed(3)}` : parseFloat(value).toFixed(3);
+        }
+
+        function getValidEntry(index) {
+            for (let i = index; i < data.length; i++) {
+                if (data[i].myWeight !== null || data[i].wifeWeight !== null) {
+                    return data[i];
+                }
+            }
+            return null;
+        }
+
+        // Get first and latest valid entries
+        const latestEntry = getValidEntry(0);
+        const firstEntry = getValidEntry(data.length - 1);
+
+        if (!latestEntry || !firstEntry) {
+            document.getElementById("dayOneProgress").innerHTML = "Insufficient data.";
+            document.getElementById("weeklyProgress").innerHTML = "Insufficient data.";
+            return;
+        }
+
+        // Calculate overall progress
         const dayOneProgress = {
-            bhavinProgress: (latestEntry.myWeight - firstEntry.myWeight).toFixed(3),
-            ridhamProgress: (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3),
+            bhavinProgress: latestEntry.myWeight !== null && firstEntry.myWeight !== null
+                ? (latestEntry.myWeight - firstEntry.myWeight).toFixed(3)
+                : "N/A",
+            ridhamProgress: latestEntry.wifeWeight !== null && firstEntry.wifeWeight !== null
+                ? (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3)
+                : "N/A",
         };
-
-        // Show + or - based on weight gain/loss
-        const bhavinSign = dayOneProgress.bhavinProgress >= 0 ? `+${dayOneProgress.bhavinProgress}` : `${dayOneProgress.bhavinProgress}`;
-        const ridhamSign = dayOneProgress.ridhamProgress >= 0 ? `+${dayOneProgress.ridhamProgress}` : `${dayOneProgress.ridhamProgress}`;
 
         // Apply background color based on positive or negative progress
         const bhavinBackgroundColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
@@ -329,43 +356,38 @@
 
         document.getElementById("dayOneProgress").innerHTML = `
             <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                Bhavin's progress: ${bhavinSign} kg
+                Bhavin: ${formatProgress(dayOneProgress.bhavinProgress)} kg
             </div>
             <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                Ridham's progress: ${ridhamSign} kg
+                Ridham: ${formatProgress(dayOneProgress.ridhamProgress)} kg
             </div>
         `;
 
-        // Weekly Progress (last 7 days)
+        // Calculate weekly progress
         const lastWeekData = data.filter(d => {
-            const diff = (new Date() - new Date(d.date)) / (1000 * 3600 * 24); // in days
-            return diff <= 7;
+            const diff = (new Date() - new Date(d.date)) / (1000 * 3600 * 24);
+            return diff <= 7 && (d.myWeight !== null || d.wifeWeight !== null);
         });
 
         if (lastWeekData.length > 1) {
-            const weekEnd = lastWeekData[0]; // Newest within the last 7 days
-            const weekStart = lastWeekData[lastWeekData.length - 1]; // Oldest within the last 7 days
-            
-            // Weekly progress calculation
+            const weekEnd = lastWeekData[0];
+            const weekStart = lastWeekData[lastWeekData.length - 1];
+
             const weeklyProgress = {
-                bhavin: (weekEnd.myWeight - weekStart.myWeight).toFixed(3),
-                ridham: (weekEnd.wifeWeight - weekStart.wifeWeight).toFixed(3),
+                bhavin: weekEnd.myWeight !== null && weekStart.myWeight !== null
+                    ? (weekEnd.myWeight - weekStart.myWeight).toFixed(3)
+                    : "N/A",
+                ridham: weekEnd.wifeWeight !== null && weekStart.wifeWeight !== null
+                    ? (weekEnd.wifeWeight - weekStart.wifeWeight).toFixed(3)
+                    : "N/A",
             };
 
-            // Show + or - for weekly progress
-            const bhavinWeeklySign = weeklyProgress.bhavin >= 0 ? `+${weeklyProgress.bhavin}` : `${weeklyProgress.bhavin}`;
-            const ridhamWeeklySign = weeklyProgress.ridham >= 0 ? `+${weeklyProgress.ridham}` : `${weeklyProgress.ridham}`;
-
-            // Apply background color based on positive or negative progress
-            const bhavinWeeklyBackgroundColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-            const ridhamWeeklyBackgroundColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';  // Green for loss, Red for gain
-
             document.getElementById("weeklyProgress").innerHTML = `
-                <div style="background-color:${bhavinWeeklyBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                    Bhavin's weekly progress: ${bhavinWeeklySign} kg
+                <div style="background-color:${bhavinBackgroundColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                    Bhavin: ${formatProgress(weeklyProgress.bhavin)} kg
                 </div>
-                <div style="background-color:${ridhamWeeklyBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                    Ridham's weekly progress: ${ridhamWeeklySign} kg
+                <div style="background-color:${ridhamBackgroundColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                    Ridham: ${formatProgress(weeklyProgress.ridham)} kg
                 </div>
             `;
         } else {
