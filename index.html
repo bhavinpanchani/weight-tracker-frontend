@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rivin's Weight Tracker</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,7 +135,7 @@
             background: #fff;
             border-radius: 15px;  /* Rounded corners for smoother look */
             padding: 25px;
-            margin: 20px 0;
+            margin: 10px 0;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
             transition: all 0.3s ease;
             text-align: left;
@@ -261,8 +263,8 @@
             const tr = `
                 <tr>
                     <td>${formattedDate}</td>
-                    <td>${row.myWeight} kg</td>
-                    <td>${row.wifeWeight} kg</td>
+                    <td>${row.myWeight}</td>
+                    <td>${row.wifeWeight}</td>
                     <td><button onclick="deleteWeight(${row.id})" style="background:red;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
                 </tr>
             `;
