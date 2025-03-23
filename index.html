@@ -203,8 +203,8 @@
         <div class="card">
             <form id="weightForm">
                 <input type="date" name="date" id="datePicker" required>
-                <input type="number" step="0.001" name="my_weight" placeholder="Bhavin's Weight (kg)" inputmode="decimal">
-                <input type="number" step="0.001" name="wife_weight" placeholder="Ridham's Weight (kg)" inputmode="decimal">
+                <input type="number" step="0.001" name="my_weight" placeholder="Bhavin's Weight (kg)" inputmode="decimal" required>
+                <input type="number" step="0.001" name="wife_weight" placeholder="Ridham's Weight (kg)" inputmode="decimal" required>
                 <button type="submit">Add Weight</button>
             </form>
         </div>
@@ -372,55 +372,28 @@
         }
     }
 
-    document.getElementById('weightForm').onsubmit = async function(e) {
-        e.preventDefault();
+        document.getElementById('weightForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                date: this.date.value,  // Get selected date
+                myWeight: parseFloat(this.my_weight.value),
+                wifeWeight: parseFloat(this.wife_weight.value)
+            };
 
-        // Get input values
-        const date = this.date.value;
-        let myWeight = this.my_weight.value ? parseFloat(this.my_weight.value) : null;
-        let wifeWeight = this.wife_weight.value ? parseFloat(this.wife_weight.value) : null;
-
-        // Prepare the form data
-        const formData = { date, myWeight, wifeWeight };
-
-        // Check if the date already exists in the database
-        const response = await fetch(`${baseURL}/api/weights?date=${date}`);
-        const existingRecord = await response.json();
-
-        if (existingRecord) {
-            // If record exists and only myWeight is set, update wifeWeight
-            if (myWeight && !wifeWeight) {
-                formData.wifeWeight = existingRecord.wifeWeight;
-            } else if (wifeWeight && !myWeight) {
-                formData.myWeight = existingRecord.myWeight;
-            }
-
-            // Send the updated data to the backend
-            await fetch(`${baseURL}/api/weights/${existingRecord.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-        } else {
-            // If no record exists for the given date, create a new record
             await fetch(`${baseURL}/api/weights`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formData)
             });
-        }
 
-        // Reset the form
-        this.reset();
+            this.reset();
+            const today = new Date();
+            const localDate = today.toLocaleDateString('en-CA'); // Formats the date in YYYY-MM-DD format for local timezone
+            document.getElementById("datePicker").value = localDate;
 
-        // Set the date picker to today's date after submission
-        const today = new Date();
-        const localDate = today.toLocaleDateString('en-CA');
-        document.getElementById("datePicker").value = localDate;
-
-        // Optionally, refresh data
-        fetchAndUpdate();
-    };
+            fetchAndUpdate();
+        };
 
         async function deleteWeight(id) {
             if (!confirm("Are you sure you want to delete this record?")) return;
