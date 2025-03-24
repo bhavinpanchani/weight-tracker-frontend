@@ -400,11 +400,17 @@
 
         // Display message for missing weight values
         if (latestEntry.myWeight === null) {
-            document.getElementById("bhavinProgressText").textContent = "Enter today's weight...";
+            const bhavinText = document.getElementById("bhavinProgressText");
+            bhavinText.textContent = "Enter today's weight...";
+            ridhamText.style.fontSize = "16px";
+            ridhamText.style.fontWeight = "normal";
         } 
 
         if (latestEntry.wifeWeight === null) {
-            document.getElementById("ridhamProgressText").textContent = "Enter today's weight...";
+            const ridhamText = document.getElementById("ridhamProgressText")
+            ridhamText.textContent = "Enter today's weight...";
+            ridhamText.style.fontSize = "16px";
+            ridhamText.style.fontWeight = "normal";
         }
     }
 
