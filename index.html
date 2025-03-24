@@ -31,6 +31,46 @@
             margin: 0 auto;
         }
 
+        .progress-card-2{
+            width: 100%;
+            background: #fff;
+            border-radius: 15px;  /* Rounded corners for smoother look */
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 5px;
+            padding-bottom: 20px;
+            margin-top: -5px;
+            margin-bottom: 5px;
+            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); Soft shadow for depth */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            height: 10px;
+            /* margin: 10px 0; */
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .progress-bar-ridham {
+            height: 100%;
+            background-color: #dc3545;
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+
         /* Common Card Styling */
         .card {
             width: 100%;
@@ -161,6 +201,11 @@
             color: #007bff;
         }
 
+        .progress-text #ridhamProgressText {
+            font-weight: bold;
+            color: #dc3545;
+        }
+
         #weeklyProgress, #dayOneProgress {
             /* padding: 10px; */
             font-size: 18px;
@@ -191,9 +236,23 @@
 </head>
 <body>
 
-    <h2>Rivin's Weight Tracker</h2>
+    <!-- <h2>Rivin's Weight Tracker</h2> -->
 
     <div class="container">
+
+        <div class="progress-card-2">
+            <!-- <h3>Weight Progress</h3> -->
+            <div class="progress-text">Bhavin's Progress: <span id="bhavinProgressText">0%</span></div>
+            <div class="progress-bar-container">
+                <div id="bhavinProgressBar" class="progress-bar"></div>
+            </div>
+            <!-- <br> -->
+            <div class="progress-text">Ridham's Progress: <span id="ridhamProgressText">0%</span></div>
+            <div class="progress-bar-container">
+                <div id="ridhamProgressBar" class="progress-bar-ridham"></div>
+            </div>
+        </div>
+
         <!-- Chart Card -->
         <div class="card chart-container">
             <canvas id="weightChart"></canvas>
@@ -301,8 +360,52 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
+        updateProgressBars(data);
         // Calculate weekly and day one progress
         calculateProgress(data);
+    }
+
+    function updateProgressBars(data) {
+        if (data.length === 0) return;
+
+        const latestEntry = data[0];
+        const initialEntry = data[data.length - 1]; // Assuming the first entry is the initial weight
+
+        function calculateProgress(currentWeight, initialWeight) {
+            const goalWeight = 80;
+
+            // Check if currentWeight is null or invalid
+            if (currentWeight === null || currentWeight === undefined) {
+                return 0;  // No progress if current weight is missing
+            }
+
+            if (currentWeight <= goalWeight) {
+                return 100;  // Goal achieved if weight is 80kg or less
+            }
+
+            const progress = ((initialWeight - currentWeight) / (initialWeight - goalWeight)) * 100;
+            return Math.min(progress, 100);  // Ensure the progress doesn't exceed 100%
+        }
+
+        // Calculate progress for Bhavin and Ridham
+        const bhavinProgress = calculateProgress(latestEntry.myWeight, initialEntry.myWeight);
+        const ridhamProgress = calculateProgress(latestEntry.wifeWeight, initialEntry.wifeWeight);
+
+        // Update the progress bars and text
+        document.getElementById("bhavinProgressBar").style.width = bhavinProgress + "%";
+        document.getElementById("ridhamProgressBar").style.width = ridhamProgress + "%";
+
+        document.getElementById("bhavinProgressText").textContent = bhavinProgress.toFixed(1) + "%";
+        document.getElementById("ridhamProgressText").textContent = ridhamProgress.toFixed(1) + "%";
+
+        // Display message for missing weight values
+        if (latestEntry.myWeight === null) {
+            document.getElementById("bhavinProgressText").textContent = "Enter today's weight...";
+        } 
+
+        if (latestEntry.wifeWeight === null) {
+            document.getElementById("ridhamProgressText").textContent = "Enter today's weight...";
+        }
     }
 
     function calculateProgress(data) {
