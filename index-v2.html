@@ -59,6 +59,13 @@
                 border-bottom: 1px solid #dee2e6;
                 padding-bottom: 10px;
             }
+
+            .card h4 {
+                color: #343a40;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 10px;
+            }
     
             form {
                 display: flex;
@@ -106,12 +113,15 @@
     
             .chart-container {
                 width: 100%;
-                height: 400px;
+                /* height: 400px; */
+                height: 45vh;
             }
     
             .progress-bar-container {
                 width: 100%;
-                background-color: #e9ecef;
+                /* background-color: #e9ecef; */
+                background-color: #d0d5d6;
+                /* background-color: lightgrey; */
                 border-radius: 5px;
                 height: 20px;
                 margin-bottom: 15px;
@@ -135,13 +145,45 @@
             }
             
             #bhavinProgressText{
-                color: #007bff;
+                /* color: #007bff; */
+                color: white;
                 font-weight: bold;
             }
 
             #ridhamProgressText{
-                color: #28a745;
+                /* color: #28a745; */
+                color: white;
                 font-weight: bold;
+            }
+            /* Flexbox container for the progress cards */
+            .progress-cards {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px; /* Space between the cards */
+                /* margin-bottom: 30px; */
+            }
+
+            .card {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                padding: 1px 15px 15px 15px;
+                flex: 1;
+                min-width: 30%; /* Ensures each card doesn't shrink too much */
+                box-sizing: border-box;
+            }
+
+            .card h2 {
+                color: #343a40;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 10px;
+            }
+
+            /* Optional: You can also tweak the width and margins of other elements to maintain consistency */
+            .card .progress-text {
+                font-size: 16px;
+                margin-bottom: 5px;
             }
         </style>
     </head>
@@ -151,26 +193,43 @@
             <div class="header">
                 <!-- <h1>Rivin's Weight Tracker</h1> -->
             </div>
-    
-            <div class="card">
-                <h2>Overall Progress</h2>
-                <div class="progress-text">Bhavin's Progress: <span id="bhavinProgressText">0%</span></div>
-                <div class="progress-bar-container">
-                    <div id="bhavinProgressBar" class="progress-bar"></div>
+        
+            <!-- New container for horizontal alignment of the 3 cards -->
+            <div class="progress-cards">
+                <div class="card">
+                    <h4>Overall Progress</h4>
+                    <div class="progress-text">Bhavin:</div>
+                    <div class="progress-bar-container">
+                        <div id="bhavinProgressBar" class="progress-bar">
+                            <span class="progress-text" id="bhavinProgressText">0%</span> <!-- Progress text here -->
+                        </div>
+                    </div>                    
+                    <div class="progress-text">Ridham:</div>
+                    <div class="progress-bar-container">
+                        <div id="ridhamProgressBar" class="progress-bar progress-bar-ridham">
+                            <span id="ridhamProgressText">0%</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="progress-text">Ridham's Progress: <span id="ridhamProgressText">0%</span></div>
-                <div class="progress-bar-container">
-                    <div id="ridhamProgressBar" class="progress-bar progress-bar-ridham"></div>
+        
+                <div class="card">
+                    <h4>Weekly Progress</h4>
+                    <div id="weeklyProgress"></div>
+                </div>
+        
+                <div class="card">
+                    <h4>Day One Progress</h4>
+                    <div id="dayOneProgress"></div>
                 </div>
             </div>
-    
+        
             <div class="card">
                 <h2>Weight Chart</h2>
                 <div class="chart-container">
                     <canvas id="weightChart"></canvas>
                 </div>
             </div>
-    
+        
             <div class="card">
                 <h2>Add/Update Weight</h2>
                 <form id="weightForm">
@@ -180,17 +239,7 @@
                     <button type="submit">Add weight</button>
                 </form>
             </div>
-    
-            <div class="card">
-                <h2>Weekly Progress</h2>
-                <div id="weeklyProgress"></div>
-            </div>
-    
-            <div class="card">
-                <h2>Progress from Day One</h2>
-                <div id="dayOneProgress"></div>
-            </div>
-    
+        
             <div class="card">
                 <h2>Weight Log</h2>
                 <table>
@@ -206,7 +255,6 @@
                 </table>
             </div>
         </div>
-    
 
     <script>
         // Set the default value of the date input to today's date
@@ -326,14 +374,14 @@
         // Display message for missing weight values
         if (latestEntry.myWeight === null) {
             const bhavinText = document.getElementById("bhavinProgressText");
-            bhavinText.textContent = "Enter today's weight...";
+            bhavinText.textContent = "N/A";
             bhavinText.style.fontSize = "16px";
             bhavinText.style.fontWeight = "normal";
         } 
 
         if (latestEntry.wifeWeight === null) {
             const ridhamText = document.getElementById("ridhamProgressText")
-            ridhamText.textContent = "Enter today's weight...";
+            ridhamText.textContent = "N/A";
             ridhamText.style.fontSize = "16px";
             ridhamText.style.fontWeight = "normal";
         }
