@@ -68,31 +68,57 @@
                 padding-bottom: 10px;
             }
     
-            form {
+            /* form {
                 display: flex;
                 flex-direction: column;
-            }
+            } */
 
             /* #datePicker{
                 text-align: center;
                 width: 95%;
             } */
+
+            .weightFormInputsDiv {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 25px;
+            }
+
+            .weightFormInputs {
+                flex: 1;
+                min-width: 1px;
+            }
+
+            .weightFormInputs input{
+                width: 100%;
+                height: 40%;
+                padding: 8px;
+                /* font-size: 16px; */
+            }
     
             input[type="date"], input[type="number"] {
-                padding: 12px;
-                margin-bottom: 15px;
+                /* margin-bottom: 4px; */
+                background-color: white;
+                color: grey;
                 border: 1px solid #ced4da;
-                border-radius: 5px;
+                border-radius: 10px;
                 font-size: 16px;
                 /* width: 92%; */
             }
+            input[type="date"]{
+                appearance: none;
+                -webkit-appearance: none;
+            }
     
             button {
+                width: 100%;
+                padding: 8px;
+                /* height: 40%; */
                 background-color: #007bff;
                 color: white;
-                padding: 12px 20px;
                 border: none;
-                border-radius: 5px;
+                border-radius: 10px;
                 cursor: pointer;
                 font-size: 16px;
                 transition: background-color 0.3s;
@@ -121,7 +147,7 @@
             .chart-container {
                 width: 100%;
                 /* height: 400px; */
-                height: 30vh;
+                height: 35vh;
             }
     
             .progress-bar-container {
@@ -194,25 +220,6 @@
                 font-size: 16px;
                 margin-bottom: 5px;
             }
-
-            .weightFormInputsDiv {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 25px;
-            }
-
-            .weightFormInputs {
-                flex: 1;
-                min-width: 30px;
-            }
-
-            .weightFormInputs input, 
-            .weightFormInputs button {
-                width: 100%;
-                padding: 8px;
-                font-size: 16px;
-            }
         </style>
     </head>
     <body>
@@ -282,7 +289,7 @@
                             <input type="number" step="0.001" name="wife_weight" placeholder="Ridham" inputmode="decimal">
                         </div>
                         <div class="weightFormInputs">
-                            <button type="submit">Add</button>
+                            <button type="submit">+</button>
                         </div>
                     </div>
                 </form>
@@ -339,7 +346,7 @@
                     <td>${formattedDate}</td>
                     <td>${myWeight}</td>
                     <td>${wifeWeight}</td>
-                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:10px;border-radius:5px;cursor:pointer;">X</button></td>
+                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:8px;border-radius:50px;cursor:pointer;">X</button></td>
                 </tr>
             `;
             table.innerHTML += tr;
