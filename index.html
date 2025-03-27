@@ -562,7 +562,7 @@
 
         if(!myWeight && !wifeWeight){
             // Confirmation message
-            alert(`Confirmation\n\nDate: ${formattedDate}\nPlease enter weight...`);
+            alert(`Date: ${formattedDate}\nPlease enter weight...`);
             return; // Stop submission if the user cancels
         }
 
@@ -578,20 +578,20 @@
                 // Case 1: If both weights exist and are unchanged, stop execution
                 if (myWeight && wifeWeight && existingRecord.myWeight && existingRecord.wifeWeight) {
                     if (myWeight === existingRecord.myWeight && wifeWeight === existingRecord.wifeWeight) {
-                        alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for both Bhavin & Ridham`);
+                        alert(`Date: ${formattedDate}\nRecord already exists for both Bhavin & Ridham`);
                         return false; // Stop further execution
                     }
                 }
 
                 // Case 2: If Bhavin's weight is NULL but Ridham's weight is same as existing
                 if (!myWeight && wifeWeight && wifeWeight === existingRecord.wifeWeight) {
-                    alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for Ridham`);
+                    alert(`Date: ${formattedDate}\nRecord already exists for Ridham`);
                     return false; // Stop execution
                 }
 
                 // Case 3: If Ridham's weight is NULL but Bhavin's weight is same as existing
                 if (!wifeWeight && myWeight && myWeight === existingRecord.myWeight) {
-                    alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for Bhavin`);
+                    alert(`Date: ${formattedDate}\nRecord already exists for Bhavin`);
                     return false; // Stop execution
                 }
 
