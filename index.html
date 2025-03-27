@@ -557,6 +557,14 @@
         let myWeight = this.my_weight.value ? parseFloat(this.my_weight.value) : null;
         let wifeWeight = this.wife_weight.value ? parseFloat(this.wife_weight.value) : null;
 
+        const unFormattedDate = new Date(this.date.value + "T00:00:00");
+        const formattedDate = unFormattedDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+
+        // Confirmation message
+        const confirmation = confirm(`Confirmation\n\nDate: ${formattedDate}\nBhavin's Weight: ${myWeight || "–"}\nRidham's Weight: ${wifeWeight || "–"}`);
+
+        if (!confirmation) return; // Stop submission if the user cancels
+
         // Prepare the form data
         const formData = { date, myWeight, wifeWeight };
 
