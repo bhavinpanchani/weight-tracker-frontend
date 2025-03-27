@@ -1,297 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rivin's Weight Tracker</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <style>
-        /* General Page Styling */
-        body {
-            font-family: "Roboto", sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            margin: 20px;
-            transition: background-color 0.3s, color 0.3s; /* Smooth transition for color changes */
-        }
-
-        /* Container for Equal Width */
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 90%;
-            max-width: 600px; /* Expands on larger screens */
-            margin: 0 auto;
-        }
-
-        .progress-card-2{
-            width: 100%;
-            background: #fff;
-            border-radius: 15px;  /* Rounded corners for smoother look */
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-top: 5px;
-            padding-bottom: 20px;
-            margin-top: -5px;
-            margin-bottom: 5px;
-            /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); Soft shadow for depth */
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
-            height: 10px;
-            /* margin: 10px 0; */
-        }
-
-        .progress-bar {
-            height: 100%;
-            background-color: #007bff;
-            width: 0%;
-            border-radius: 5px;
-            transition: width 0.5s ease-in-out;
-        }
-        
-        .progress-bar-ridham {
-            height: 100%;
-            background-color: #dc3545;
-            width: 0%;
-            border-radius: 5px;
-            transition: width 0.5s ease-in-out;
-        }
-
-        /* Common Card Styling */
-        .card {
-            width: 100%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            margin: 10px 0;
-        }
-
-        /* Form Styling (Inside Card) */
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            width: 95%;
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        /* Table Styling */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background: #007bff;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            width: 100%;
-        }
-
-        #weightChart{
-            height: 35vh;
-        }
-
-        /* Updated Date Picker Styling */
-        input[type="date"] {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            background-color: #fff;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-
-        input[type="date"]:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            outline: none;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: opacity(50%);
-            cursor: pointer;
-        }
-
-        /* Progress Cards Styling */
-        .progress-card {
-            width: 100%;
-            background: #fff;
-            border-radius: 15px;  /* Rounded corners for smoother look */
-            padding: 25px;
-            margin: 10px 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .progress-card h3 {
-            font-size: 22px;
-            color: #333;
-            margin-top: -5px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-transform: uppercase; /* Capitalize the header for a modern look */
-        }
-
-        .progress-text {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #333;
-        }
-
-        .progress-text span {
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .progress-text #ridhamProgressText {
-            font-weight: bold;
-            color: #dc3545;
-        }
-
-        #weeklyProgress, #dayOneProgress {
-            /* padding: 10px; */
-            font-size: 18px;
-            /* background: #f7f7f7; */
-            /* border-radius: 10px; */
-            margin-top: 10px;
-            color: #555;
-        }
-
-        #weeklyProgress span, #dayOneProgress span {
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        /* Mobile Responsive: Smaller Cards */
-        @media (max-width: 768px) {
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rivin's Weight Tracker</title>
+        <link rel="icon" type="image/png" href="favicon.png">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+            /* @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            } */
+            body {
+                font-family: 'Montserrat', sans-serif;
+                background-color: #f8f9fa;
+                color: #343a40;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+            }
+    
             .container {
-                max-width: 400px; /* Reduce max width for mobile */
+                width: 90%;
+                max-width: 800px;
+                padding: 20px;
             }
-            .progress-card {
-                padding: 20px;  /* Reduce padding for smaller screens */
+    
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
             }
-            .progress-card h3 {
-                font-size: 20px;  /* Adjust header size on mobile */
+    
+            .header h1 {
+                font-size: 2.5em;
+                color: #007bff;
+                margin-bottom: 5px;
             }
-        }
-    </style>
-</head>
-<body>
+    
+            .header p {
+                font-size: 1.1em;
+                color: #6c757d;
+            }
+    
+            .card {
+                background-color: white;
+                border-radius: 10px;
+                /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+                margin-top: -40px;
+                margin-bottom: 50px;
+                /* padding: 1px 15px 15px 15px; */
+                /* opacity: 0; Initially hidden */
+                /* animation: fadeIn 0.8s ease-in-out forwards; */
+            }
+    
+            .card h2 {
+                color: #343a40;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 10px;
+            }
 
-    <!-- <h2>Rivin's Weight Tracker</h2> -->
+            .card h4 {
+                color: #343a40;
+                margin-top: 4px;
+                margin-bottom: 8px;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 10px;
+            }
+    
+            /* form {
+                display: flex;
+                flex-direction: column;
+            } */
 
-    <div class="container">
+            /* #datePicker{
+                text-align: center;
+                width: 95%;
+            } */
 
-        <div class="progress-card-2">
-            <!-- <h3>Weight Progress</h3> -->
-            <div class="progress-text">Bhavin's Progress: <span id="bhavinProgressText">0%</span></div>
-            <div class="progress-bar-container">
-                <div id="bhavinProgressBar" class="progress-bar"></div>
+            .weightFormInputsDiv {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 25px;
+            }
+
+            .weightFormInputs {
+                flex: 1;
+                min-width: 1px;
+            }
+
+            .weightFormInputs input{
+                width: 100%;
+                height: 50%;
+                padding: 8px;
+                /* font-size: 16px; */
+            }
+    
+            input[type="date"], input[type="number"] {
+                /* margin-bottom: 4px; */
+                background-color: white;
+                color: grey;
+                border: 1px solid #ced4da;
+                border-radius: 10px;
+                font-size: 16px;
+                /* width: 92%; */
+            }
+            input[type="date"]{
+                appearance: none;
+                -webkit-appearance: none;
+            }
+    
+            .weightFormInputs button {
+                width: 100%;
+                padding: 8px 0px;
+                height: 50%;
+                /* line-height: normal; */
+                box-sizing: content-box;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: background-color 0.3s;
+            }
+    
+            button:hover {
+                background-color: #0056b3;
+            }
+    
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+    
+            th, td {
+                padding: 12px 8px 12px 8px;
+                text-align: center;
+                border-bottom: 1px solid #dee2e6;
+            }
+    
+            th {
+                background-color: #f2f2f2;
+                font-weight: 600;
+            }
+    
+            .chart-container {
+                width: 100%;
+                /* height: 400px; */
+                height: 35vh;
+            }
+    
+            .progress-bar-container {
+                width: 100%;
+                /* background-color: #e9ecef; */
+                background-color: #d0d5d6;
+                /* background-color: lightgrey; */
+                border-radius: 5px;
+                height: 20px;
+                margin-bottom: 10px;
+            }
+    
+            .progress-bar {
+                height: 100%;
+                background-color: #007bff;
+                width: 0%;
+                border-radius: 5px;
+                transition: width 0.5s ease-in-out;
+            }
+    
+            .progress-bar-ridham {
+                background-color: #28a745;
+            }
+    
+            .progress-text {
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+            
+            #bhavinProgressText{
+                /* color: #007bff; */
+                color: white;
+                font-weight: bold;
+                margin-left: 4px;
+            }
+
+            #ridhamProgressText{
+                /* color: #28a745; */
+                color: white;
+                font-weight: bold;
+                margin-left: 4px;
+            }
+            /* Flexbox container for the progress cards */
+            .progress-cards {
+                display: flex;
+                justify-content: space-between;
+                gap: 6px; /* Space between the cards */
+                /* margin-bottom: 30px; */
+            }
+
+            .card {
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                padding: 4px 8px 4px 8px;
+                flex: 1;
+                min-width: 30%; /* Ensures each card doesn't shrink too much */
+                box-sizing: border-box;
+            }
+
+            .card h2 {
+                color: #343a40;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 10px;
+            }
+
+            /* Optional: You can also tweak the width and margins of other elements to maintain consistency */
+            .card .progress-text {
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+    
+        <div class="container">
+            <div class="header">
+                <!-- <h1>Rivin's Weight Tracker</h1> -->
             </div>
-            <!-- <br> -->
-            <div class="progress-text">Ridham's Progress: <span id="ridhamProgressText">0%</span></div>
-            <div class="progress-bar-container">
-                <div id="ridhamProgressBar" class="progress-bar-ridham"></div>
+        
+            <!-- New container for horizontal alignment of the 3 cards -->
+            <div class="progress-cards">
+                <div class="card">
+                    <h4>Overall Progress</h4>
+                    <div class="progress-text">Bhavin:</div>
+                    <div class="progress-bar-container">
+                        <div id="bhavinProgressBar" class="progress-bar">
+                            <span class="progress-text" id="bhavinProgressText">0%</span> <!-- Progress text here -->
+                        </div>
+                    </div>                    
+                    <div class="progress-text">Ridham:</div>
+                    <div class="progress-bar-container">
+                        <div id="ridhamProgressBar" class="progress-bar progress-bar-ridham">
+                            <span id="ridhamProgressText">0%</span>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card">
+                    <h4>Weekly Progress</h4>
+                    <div id="weeklyProgress"></div>
+                </div>
+        
+                <div class="card">
+                    <h4>Day One Progress</h4>
+                    <div id="dayOneProgress"></div>
+                </div>
+            </div>
+        
+            <div class="card">
+                <h4>Weight Chart</h4>
+                <div class="chart-container">
+                    <canvas id="weightChart"></canvas>
+                </div>
+            </div>
+        
+            <!-- <div class="card">
+                <h2>Add/Update Weight</h2>
+                <form id="weightForm">
+                    <input type="date" name="date" id="datePicker" required>
+                    <input type="number" step="0.001" name="my_weight" placeholder="Bhavin's Weight (kg)" inputmode="decimal">
+                    <input type="number" step="0.001" name="wife_weight" placeholder="Ridham's Weight (kg)" inputmode="decimal">
+                    <button type="submit">Add weight</button>
+                </form>
+            </div> -->
+
+            <div class="card">
+                <h4>Add/Update Weight</h4>
+                <form id="weightForm">
+                    <div class="weightFormInputsDiv">
+                        <div class="weightFormInputs">
+                            <input type="date" name="date" id="datePicker" required>
+                        </div>
+                        <div class="weightFormInputs">
+                            <input type="number" step="0.001" name="my_weight" placeholder="Bhavin" inputmode="decimal">
+                        </div>
+                        <div class="weightFormInputs">
+                            <input type="number" step="0.001" name="wife_weight" placeholder="Ridham" inputmode="decimal">
+                        </div>
+                        <div class="weightFormInputs">
+                            <button type="submit">+</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+            <div class="card">
+                <h4>Weight Log</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bhavin's Weight</th>
+                            <th>Ridham's Weight</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weightTable"></tbody>
+                </table>
             </div>
         </div>
-
-        <!-- Chart Card -->
-        <div class="card chart-container">
-            <canvas id="weightChart"></canvas>
-        </div>
-
-        <!-- Form Card -->
-        <div class="card">
-            <form id="weightForm">
-                <input type="date" name="date" id="datePicker" required>
-                <input type="number" step="0.001" name="my_weight" placeholder="Bhavin's Weight (kg)" inputmode="decimal">
-                <input type="number" step="0.001" name="wife_weight" placeholder="Ridham's Weight (kg)" inputmode="decimal">
-                <button type="submit">Add Weight</button>
-            </form>
-        </div>
-
-        <!-- Weekly & Progress Cards -->
-        <div class="progress-card">
-            <h3>Weekly Progress</h3>
-            <div id="weeklyProgress"></div>
-        </div>
-
-        <div class="progress-card">
-            <h3>Progress from Day One</h3>
-            <div id="dayOneProgress"></div>
-        </div>
-
-        <!-- Table Card -->
-        <div class="card">
-            <table>
-                <tr>
-                    <th>Date</th>
-                    <th>Bhavin's Weight</th>
-                    <th>Ridham's Weight</th>
-                    <th>Delete</th>
-                </tr>
-                <tbody id="weightTable"></tbody>
-            </table>
-        </div>
-    </div>
 
     <script>
         // Set the default value of the date input to today's date
@@ -328,7 +360,7 @@
                     <td>${formattedDate}</td>
                     <td>${myWeight}</td>
                     <td>${wifeWeight}</td>
-                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:5px;border-radius:5px;cursor:pointer;">X</button></td>
+                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:8px;width:35px;height:35px;border-radius:50px;cursor:pointer;font-weight:bold;">X</button></td>
                 </tr>
             `;
             table.innerHTML += tr;
@@ -354,7 +386,7 @@
                 labels: dates,
                 datasets: [
                     { label: "Bhavin's Weight", data: myWeights, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.1)", fill: true },
-                    { label: "Ridham's Weight", data: wifeWeights, borderColor: "#dc3545", backgroundColor: "rgba(220,53,69,0.1)", fill: true }
+                    { label: "Ridham's Weight", data: wifeWeights, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.1)", fill: true }
                 ]
             },
             options: { responsive: true, maintainAspectRatio: false,
@@ -411,14 +443,14 @@
         // Display message for missing weight values
         if (latestEntry.myWeight === null) {
             const bhavinText = document.getElementById("bhavinProgressText");
-            bhavinText.textContent = "Enter today's weight...";
+            bhavinText.textContent = "N/A";
             bhavinText.style.fontSize = "16px";
             bhavinText.style.fontWeight = "normal";
         } 
 
         if (latestEntry.wifeWeight === null) {
             const ridhamText = document.getElementById("ridhamProgressText")
-            ridhamText.textContent = "Enter today's weight...";
+            ridhamText.textContent = "N/A";
             ridhamText.style.fontSize = "16px";
             ridhamText.style.fontWeight = "normal";
         }
@@ -474,11 +506,11 @@
         const ridhamDayOneColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';
 
         document.getElementById("dayOneProgress").innerHTML = `
-            <div style="background-color:${bhavinDayOneColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                Bhavin: ${formatProgress(dayOneProgress.bhavinProgress)} kg
+            <div style="background-color:${bhavinDayOneColor}; padding: 6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                Bhavin: ${formatProgress(dayOneProgress.bhavinProgress)}
             </div>
-            <div style="background-color:${ridhamDayOneColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                Ridham: ${formatProgress(dayOneProgress.ridhamProgress)} kg
+            <div style="background-color:${ridhamDayOneColor}; padding: 6px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                Ridham: ${formatProgress(dayOneProgress.ridhamProgress)}
             </div>
         `;
 
@@ -505,11 +537,11 @@
             const ridhamWeeklyColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';
 
             document.getElementById("weeklyProgress").innerHTML = `
-                <div style="background-color:${bhavinWeeklyColor}; padding: 10px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
-                    Bhavin: ${formatProgress(weeklyProgress.bhavin)} kg
+                <div style="background-color:${bhavinWeeklyColor}; padding: 6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                    Bhavin: ${formatProgress(weeklyProgress.bhavin)}
                 </div>
-                <div style="background-color:${ridhamWeeklyColor}; padding: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
-                    Ridham: ${formatProgress(weeklyProgress.ridham)} kg
+                <div style="background-color:${ridhamWeeklyColor}; padding: 6px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
+                    Ridham: ${formatProgress(weeklyProgress.ridham)}
                 </div>
             `;
         } else {
