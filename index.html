@@ -560,10 +560,11 @@
         const unFormattedDate = new Date(this.date.value + "T00:00:00");
         const formattedDate = unFormattedDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 
-        // Confirmation message
-        const confirmation = confirm(`Confirmation\n\nDate: ${formattedDate}\nBhavin's Weight: ${myWeight || "–"}\nRidham's Weight: ${wifeWeight || "–"}`);
-
-        if (!confirmation) return; // Stop submission if the user cancels
+        if(!myWeight && !wifeWeight){
+            // Confirmation message
+            alert(`Confirmation\n\nDate: ${formattedDate}\nPlease enter weight...`);
+            return; // Stop submission if the user cancels
+        }
 
         // Prepare the form data
         const formData = { date, myWeight, wifeWeight };
@@ -573,6 +574,56 @@
         const existingRecord = await response.json();
 
         if (existingRecord) {
+            function validateAndConfirmUpdate(existingRecord, myWeight, wifeWeight, formattedDate) {
+                // Case 1: If both weights exist and are unchanged, stop execution
+                if (myWeight && wifeWeight && existingRecord.myWeight && existingRecord.wifeWeight) {
+                    if (myWeight === existingRecord.myWeight && wifeWeight === existingRecord.wifeWeight) {
+                        alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for both Bhavin & Ridham`);
+                        return false; // Stop further execution
+                    }
+                }
+
+                // Case 2: If Bhavin's weight is NULL but Ridham's weight is same as existing
+                if (!myWeight && wifeWeight && wifeWeight === existingRecord.wifeWeight) {
+                    alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for Ridham`);
+                    return false; // Stop execution
+                }
+
+                // Case 3: If Ridham's weight is NULL but Bhavin's weight is same as existing
+                if (!wifeWeight && myWeight && myWeight === existingRecord.myWeight) {
+                    alert(`Confirmation\n\nDate: ${formattedDate}\nRecord already exists for Bhavin`);
+                    return false; // Stop execution
+                }
+
+                // Case 4: If Bhavin's weight is unchanged, just skip confirmation for him
+                let confirmMessage = `Confirmation\n\nDate: ${formattedDate}\n`;
+                let needsConfirmation = false;
+
+                if (myWeight && existingRecord.myWeight && myWeight !== existingRecord.myWeight) {
+                    confirmMessage += `Bhavin's weight will be updated from ${existingRecord.myWeight} to ${myWeight}\n`;
+                    needsConfirmation = true;
+                }
+
+                // Case 5: If Ridham's weight is new, allow it to be updated
+                if (wifeWeight && existingRecord.wifeWeight && wifeWeight !== existingRecord.wifeWeight) {
+                    confirmMessage += `Ridham's weight will be updated from ${existingRecord.wifeWeight} to ${wifeWeight}`;
+                    needsConfirmation = true;
+                }
+
+                // Show confirmation only if any weight is actually changing
+                if (needsConfirmation) {
+                    const confirmation = confirm(confirmMessage);
+                    if (!confirmation) return false;
+                }
+
+                return true; // Proceed with submission
+            }
+
+            // Usage inside form submission
+            if (!validateAndConfirmUpdate(existingRecord, myWeight, wifeWeight, formattedDate)) {
+                return; // Stop execution if validation fails
+            }
+
             // If record exists and only myWeight is set, update wifeWeight
             if (myWeight && !wifeWeight) {
                 formData.wifeWeight = existingRecord.wifeWeight;
