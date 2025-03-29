@@ -161,7 +161,7 @@
             .chart-container {
                 width: 100%;
                 /* height: 400px; */
-                height: 35vh;
+                height: 30vh;
             }
     
             .progress-bar-container {
@@ -246,31 +246,37 @@
             <!-- New container for horizontal alignment of the 3 cards -->
             <div class="progress-cards">
                 <div class="card">
-                    <h4>Overall Progress</h4>
-                    <div class="progress-text">Bhavin:</div>
-                    <div class="progress-bar-container">
-                        <div id="bhavinProgressBar" class="progress-bar">
-                            <span class="progress-text" id="bhavinProgressText">0%</span> <!-- Progress text here -->
-                        </div>
-                    </div>                    
-                    <div class="progress-text">Ridham:</div>
-                    <div class="progress-bar-container">
-                        <div id="ridhamProgressBar" class="progress-bar progress-bar-ridham">
-                            <span id="ridhamProgressText">0%</span>
-                        </div>
-                    </div>
+                    <h4>Day One Progress</h4>
+                    <div id="dayOneProgress"></div>
                 </div>
-        
+                <!-- New: Current Month Progress -->
+                <div class="card">
+                    <h4 id="currentMonthProgressTitle"></h4>
+                    <div id="currentMonthProgress"></div>
+                </div>
+            
                 <div class="card">
                     <h4>Weekly Progress</h4>
                     <div id="weeklyProgress"></div>
                 </div>
-        
-                <div class="card">
-                    <h4>Day One Progress</h4>
-                    <div id="dayOneProgress"></div>
-                </div>
             </div>
+            
+            <!-- Move Overall Progress to the Bottom -->
+            <div class="card">
+                <h4>Overall Progress</h4>
+                <div class="progress-text">Bhavin:</div>
+                <div class="progress-bar-container">
+                    <div id="bhavinProgressBar" class="progress-bar">
+                        <span class="progress-text" id="bhavinProgressText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-text">Ridham:</div>
+                <div class="progress-bar-container">
+                    <div id="ridhamProgressBar" class="progress-bar progress-bar-ridham">
+                        <span id="ridhamProgressText">0%</span>
+                    </div>
+                </div>
+            </div>            
         
             <div class="card">
                 <h4>Weight Chart</h4>
@@ -331,6 +337,9 @@
             const today = new Date();
             const localDate = today.toLocaleDateString('en-CA'); // Formats the date in YYYY-MM-DD format for local timezone
             document.getElementById("datePicker").value = localDate;
+
+            const monthName = today.toLocaleString('default', { month: 'long' }); // Get full month name
+            document.getElementById("currentMonthProgressTitle").textContent = `${monthName} Progress`;
         });
 
         let weightChartInstance = null; // Store the chart instance globally
@@ -405,6 +414,7 @@
         updateProgressBars(data);
         // Calculate weekly and day one progress
         calculateProgress(data);
+        calculateCurrentMonthProgress(data);
     }
 
     function updateProgressBars(data) {
@@ -547,6 +557,58 @@
         } else {
             document.getElementById("weeklyProgress").innerHTML = `Insufficient data for weekly progress.`;
         }
+    }
+
+    function calculateCurrentMonthProgress(data) {
+        if (data.length === 0) {
+            document.getElementById("currentMonthProgress").innerHTML = "No data available.";
+            return;
+        }
+
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1; // JS months are 0-indexed
+        const currentYear = now.getFullYear();
+
+        // Filter entries for the current month
+        const monthData = data.filter(d => {
+            const dateParts = d.date.split("-");
+            const entryYear = parseInt(dateParts[0]);
+            const entryMonth = parseInt(dateParts[1]);
+            return entryYear === currentYear && entryMonth === currentMonth;
+        });
+
+        if (monthData.length < 2) {
+            document.getElementById("currentMonthProgress").innerHTML = "Insufficient data.";
+            return;
+        }
+
+        // Get first and latest entry for the month
+        const firstEntry = monthData[monthData.length - 1];
+        const latestEntry = monthData[0];
+
+        // Calculate progress
+        const monthProgress = {
+            bhavin: latestEntry.myWeight !== null && firstEntry.myWeight !== null 
+                ? (latestEntry.myWeight - firstEntry.myWeight).toFixed(3) 
+                : "N/A",
+            ridham: latestEntry.wifeWeight !== null && firstEntry.wifeWeight !== null 
+                ? (latestEntry.wifeWeight - firstEntry.wifeWeight).toFixed(3) 
+                : "N/A",
+        };
+
+        // Determine background color
+        const bhavinColor = monthProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';
+        const ridhamColor = monthProgress.ridham < 0 ? '#d4edda' : '#f8d7da';
+
+        // Update UI
+        document.getElementById("currentMonthProgress").innerHTML = `
+            <div style="background-color:${bhavinColor}; padding:6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+                Bhavin: ${monthProgress.bhavin}
+            </div>
+            <div style="background-color:${ridhamColor}; padding:6px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; margin-bottom: 4px;">
+                Ridham: ${monthProgress.ridham}
+            </div>
+        `;
     }
 
     document.getElementById('weightForm').onsubmit = async function(e) {
