@@ -20,6 +20,42 @@
                     transform: translateY(0);
                 }
             } */
+            #loadingOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(255, 255, 255, 1); /* Semi-transparent white */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .spinner {
+                /* width: 50px;
+                height: 50px;
+                border: 6px solid #007bff;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 1s linear infinite; */
+
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                display: inline-block;
+                border-top: 3px solid #007bff;
+                border-right: 3px solid transparent;
+                box-sizing: border-box;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
             body {
                 font-family: 'Montserrat', sans-serif;
                 background-color: #f8f9fa;
@@ -242,6 +278,10 @@
             <div class="header">
                 <!-- <h1>Rivin's Weight Tracker</h1> -->
             </div>
+
+            <div id="loadingOverlay">
+                <div class="spinner"></div>
+            </div>            
         
             <!-- New container for horizontal alignment of the 3 cards -->
             <div class="progress-cards">
@@ -347,75 +387,86 @@
         // let baseURL = 'http://localhost:8080'
 
         async function fetchAndUpdate() {
-        const response = await fetch(`${baseURL}/api/weights`);
-        const data = await response.json();
+            
+            document.getElementById("loadingOverlay").style.display = "flex";
 
-        // ✅ Sort by date (newest to oldest)
-        data.sort((a, b) => new Date(b.date) - new Date(a.date));
+            try {
 
-        // Update Table
-        const table = document.getElementById('weightTable');
-        table.innerHTML = '';
-        data.forEach(row => {
-            const [year, month, day] = row.date.split("-").map(Number);
-            const dateObj = new Date(year, month - 1, day); // Explicitly set local date
-            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+                const response = await fetch(`${baseURL}/api/weights`);
+                const data = await response.json();
 
-            const myWeight = row.myWeight !== null ? row.myWeight : "–";
-            const wifeWeight = row.wifeWeight !== null ? row.wifeWeight : "–";
+                // ✅ Sort by date (newest to oldest)
+                data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            const tr = `
-                <tr>
-                    <td>${formattedDate}</td>
-                    <td>${myWeight}</td>
-                    <td>${wifeWeight}</td>
-                    <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:8px;width:35px;height:35px;border-radius:50px;cursor:pointer;font-weight:bold;">X</button></td>
-                </tr>
-            `;
-            table.innerHTML += tr;
-        });
+                // Update Table
+                const table = document.getElementById('weightTable');
+                table.innerHTML = '';
+                data.forEach(row => {
+                    const [year, month, day] = row.date.split("-").map(Number);
+                    const dateObj = new Date(year, month - 1, day); // Explicitly set local date
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 
-        // Update Graph
-        const dates = data.map(d => {
-            let dateObj = new Date(d.date + "T00:00:00"); // Ensures the local timezone is used
-            return dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-        }).reverse();
-        const myWeights = data.map(d => d.myWeight).reverse();
-        const wifeWeights = data.map(d => d.wifeWeight).reverse();
+                    const myWeight = row.myWeight !== null ? row.myWeight : "–";
+                    const wifeWeight = row.wifeWeight !== null ? row.wifeWeight : "–";
 
-        const ctx = document.getElementById('weightChart').getContext('2d');
+                    const tr = `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td>${myWeight}</td>
+                            <td>${wifeWeight}</td>
+                            <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:8px;width:35px;height:35px;border-radius:50px;cursor:pointer;font-weight:bold;">X</button></td>
+                        </tr>
+                    `;
+                    table.innerHTML += tr;
+                });
 
-        if (weightChartInstance) {
-            weightChartInstance.destroy();
+                // Update Graph
+                const dates = data.map(d => {
+                    let dateObj = new Date(d.date + "T00:00:00"); // Ensures the local timezone is used
+                    return dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+                }).reverse();
+                const myWeights = data.map(d => d.myWeight).reverse();
+                const wifeWeights = data.map(d => d.wifeWeight).reverse();
+
+                const ctx = document.getElementById('weightChart').getContext('2d');
+
+                if (weightChartInstance) {
+                    weightChartInstance.destroy();
+                }
+
+                weightChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [
+                            { label: "Bhavin's Weight", data: myWeights, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.1)", fill: true, borderWidth: 1, pointRadius: 2, pointHoverRadius: 7 },
+                            { label: "Ridham's Weight", data: wifeWeights, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.1)", fill: true, borderWidth: 1, pointRadius: 2, pointHoverRadius: 7 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false,
+                        // scales: {
+                        //     y: {
+                        //         ticks: {
+                        //             stepSize: 1  // This sets the increment to 1
+                        //         },
+                        //         suggestedMin: Math.min(...myWeights, ...wifeWeights) - 2, // Add space below
+                        //         suggestedMax: Math.max(...myWeights, ...wifeWeights) + 2  // Add space above
+                        //     }
+                        // }
+                    }
+                });
+
+                updateProgressBars(data);
+                // Calculate weekly and day one progress
+                calculateProgress(data);
+                calculateCurrentMonthProgress(data);
+            } catch (error){
+                console.error("Error fetching data:", error);
+            } finally {
+                // Hide loading icon after data is loaded
+                document.getElementById("loadingOverlay").style.display = "none";
+            }
         }
-
-        weightChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [
-                    { label: "Bhavin's Weight", data: myWeights, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.1)", fill: true, borderWidth: 1, pointRadius: 2, pointHoverRadius: 7 },
-                    { label: "Ridham's Weight", data: wifeWeights, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.1)", fill: true, borderWidth: 1, pointRadius: 2, pointHoverRadius: 7 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                // scales: {
-                //     y: {
-                //         ticks: {
-                //             stepSize: 1  // This sets the increment to 1
-                //         },
-                //         suggestedMin: Math.min(...myWeights, ...wifeWeights) - 2, // Add space below
-                //         suggestedMax: Math.max(...myWeights, ...wifeWeights) + 2  // Add space above
-                //     }
-                // }
-             }
-        });
-
-        updateProgressBars(data);
-        // Calculate weekly and day one progress
-        calculateProgress(data);
-        calculateCurrentMonthProgress(data);
-    }
 
     function updateProgressBars(data) {
         if (data.length === 0) return;
