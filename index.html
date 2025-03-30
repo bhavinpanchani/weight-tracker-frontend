@@ -11,7 +11,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
         <script>
-            const COOKIE_NAME = "accessGranted";
+            const ENCRYPTED_KEY_COOKIE = "encryptedKey";
     
             function getCookie(name) {
                 const cookies = document.cookie.split("; ");
@@ -31,9 +31,23 @@
                 }
                 document.cookie = name + "=" + value + "; path=/" + expires;
             }
+
+            async function validateEncryptionCookie() {
+
+                const response = await fetch(`${baseURL}/login/bhavin/validateEncryptionKey`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ encryptedKey: getCookie(ENCRYPTED_KEY_COOKIE) }),
+                });
+
+                const data = await response.json();
+                return data.loginSuccess;
+            }
     
             async function checkAccess() {
-                if (getCookie(COOKIE_NAME)) {
+                const isEncrptionKeyValid = await validateEncryptionCookie();
+
+                if (isEncrptionKeyValid) {
                     document.getElementById("container").style.display = "block";
                     return;
                 }
@@ -48,9 +62,10 @@
 
                 const data = await response.json();
                 const loginSuccess = data.loginSuccess;
+                const loginEncryptionKey = data.encryptedKey;
 
                 if (loginSuccess === true) {
-                    setCookie(COOKIE_NAME, "true", 1); // Cookie valid for 1 day
+                    setCookie(ENCRYPTED_KEY_COOKIE, loginEncryptionKey, 7); // Cookie valid for 7 day
                     document.getElementById("container").style.display = "block";
                 } else {
                     alert("Incorrect Passcode. Access Denied.");
