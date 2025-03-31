@@ -610,6 +610,25 @@
         const bhavinProgress = calculateProgress(latestEntry.myWeight, initialEntry.myWeight);
         const ridhamProgress = calculateProgress(latestEntry.wifeWeight, initialEntry.wifeWeight);
 
+        const bhavinProgressBar = document.getElementById("bhavinProgressBar");
+        const ridhamProgressBar = document.getElementById("ridhamProgressBar");
+
+        if(bhavinProgress.toFixed(1) <=20){
+            bhavinProgressBar.style.backgroundColor = "red";
+        } else if (bhavinProgress.toFixed(1) < 100) {
+            bhavinProgressBar.style.backgroundColor = "#007bff";
+        } else {
+            bhavinProgressBar.style.backgroundColor = "#28a745";
+        }
+
+        if(ridhamProgress.toFixed(1) <=20){
+            ridhamProgressBar.style.backgroundColor = "red";
+        } else if (ridhamProgress.toFixed(1) < 100) {
+            ridhamProgressBar.style.backgroundColor = "#007bff";
+        } else {
+            ridhamProgressBar.style.backgroundColor = "#28a745";
+        }
+
         // Update the progress bars and text
         document.getElementById("bhavinProgressBar").style.width = bhavinProgress + "%";
         document.getElementById("ridhamProgressBar").style.width = ridhamProgress + "%";
