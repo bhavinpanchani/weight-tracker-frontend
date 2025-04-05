@@ -10,6 +10,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
         <script>
             const ENCRYPTED_KEY_COOKIE = "encryptedKey";
@@ -379,6 +380,40 @@
                 font-size: 16px;
                 margin-bottom: 5px;
             }
+
+            .weight-chart {
+                padding-bottom: 30px;
+            }
+
+            .chart-btns-div{
+                text-align: center;
+            }
+
+            #bhavinBtn{
+                /* background-color: #007bff; */
+                color: #007bff;
+                padding: 4px;
+                margin-bottom: 2px;
+                border-radius: 50px;
+                /* border: none; */
+                border-color: #007bff;
+                border-width: 1px;
+                background-color: white;
+                width: 25%;
+            }
+
+            #ridhamBtn{
+                /* background-color: #28a745; */
+                color: #28a745;
+                padding: 4px;
+                margin-bottom: 2px;
+                border-radius: 50px;
+                /* border: none; */
+                border-color: #28a745;
+                border-width: 1px;
+                background-color: white;
+                width: 25%;
+            }
         </style>
     </head>
     <body>
@@ -433,10 +468,18 @@
                 </div>
             </div>                    
         
-            <div class="card">
+            <div class="card weight-chart">
                 <h4>Weight Chart</h4>
                 <div class="chart-container">
-                    <canvas id="weightChart"></canvas>
+                    <div class="chart-btns-div">
+                        <button onclick="toggleDatasetVisibility(0)" id="bhavinBtn">
+                            <i class="fas fa-eye" id="bhavinIcon"></i> Bhavin
+                        </button>
+                        <button onclick="toggleDatasetVisibility(1)" id="ridhamBtn">
+                            <i class="fas fa-eye" id="ridhamIcon"></i> Ridham
+                        </button>
+                    </div>  
+                    <canvas id="weightChart"></canvas>                  
                 </div>
             </div>
         
@@ -560,7 +603,7 @@
                             { label: "Ridham's Weight", data: wifeWeights, borderColor: "#28a745", backgroundColor: "rgba(40,167,69,0.1)", fill: true, borderWidth: 1, pointRadius: 2, pointHoverRadius: 7 }
                         ]
                     },
-                    options: { responsive: true, maintainAspectRatio: false,
+                    options:  { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false,
                         // scales: {
                         //     y: {
                         //         ticks: {
@@ -582,6 +625,27 @@
             } finally {
                 // Hide loading icon after data is loaded
                 document.getElementById("loadingOverlay").style.display = "none";
+            }
+        }
+
+        function toggleDatasetVisibility(index) {
+            if (weightChartInstance) {
+                const meta = weightChartInstance.getDatasetMeta(index);
+                const isCurrentlyHidden = meta.hidden === true || weightChartInstance.data.datasets[index].hidden;
+
+                // Toggle visibility
+                meta.hidden = !isCurrentlyHidden;
+                weightChartInstance.update();
+
+                // Update the icon
+                const iconId = index === 1 ? 'ridhamIcon' : 'bhavinIcon';
+                const iconElement = document.getElementById(iconId);
+
+                if (meta.hidden) {
+                    iconElement.className = 'fas fa-eye-slash';
+                } else {
+                    iconElement.className = 'fas fa-eye';
+                }
             }
         }
 
