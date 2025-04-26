@@ -522,13 +522,13 @@
             <div class="card">
                 <h4>Weight Log</h4>
                 <table>
-                    <thead>
-                        <tr>
+                    <thead id="weightTableHeading">
+                        <!-- <tr>
                             <th>Date</th>
                             <th>Bhavin's Weight</th>
                             <th>Ridham's Weight</th>
                             <th>Delete</th>
-                        </tr>
+                        </tr> -->
                     </thead>
                     <tbody id="weightTable"></tbody>
                 </table>
@@ -565,23 +565,98 @@
                 // Update Table
                 const table = document.getElementById('weightTable');
                 table.innerHTML = '';
+
+                // Group data by month
+                const groupedByMonth = {};
                 data.forEach(row => {
-                    const [year, month, day] = row.date.split("-").map(Number);
-                    const dateObj = new Date(year, month - 1, day); // Explicitly set local date
-                    const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+                const [year, month] = row.date.split('-');
+                const key = `${year}-${month}`;
+                if (!groupedByMonth[key]) {
+                    groupedByMonth[key] = [];
+                }
+                groupedByMonth[key].push(row);
+                });
+
+                // For each month group, create collapsible section
+                Object.entries(groupedByMonth).forEach(([monthKey, entries], index) => {
+                const [year, month] = monthKey.split('-');
+                const monthName = new Date(`${month}/01/${year}`).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                const collapseId = `collapseMonth${index}`;
+
+                // Sort entries by date ascending for progress calculation
+                const sortedEntries = entries.slice().sort((a, b) => a.date.localeCompare(b.date));
+                const first = sortedEntries[0];
+                const last = sortedEntries[sortedEntries.length - 1];
+
+                const bhavinProgress = (first.myWeight !== null && last.myWeight !== null)
+                    ? (last.myWeight - first.myWeight).toFixed(1)
+                    : null;
+
+                const ridhamProgress = (first.wifeWeight !== null && last.wifeWeight !== null)
+                    ? (last.wifeWeight - first.wifeWeight).toFixed(1)
+                    : null;
+
+                // let progressText = '';
+                // if (bhavinProgress !== null) progressText += `Bhavin: ${bhavinProgress > 0 ? '+' : ''}${bhavinProgress}`;
+                // if (ridhamProgress !== null) {
+                //     if (progressText) progressText += ' ';
+                //     progressText += `Ridham: ${ridhamProgress > 0 ? '+' : ''}${ridhamProgress}`;
+                // }
+
+                // Add month header with progress
+                const headerRow = document.createElement('tr');
+                headerRow.innerHTML = `
+                    <td colspan="4" style="background:#f2f2f2; cursor:pointer; font-weight:bold;" onclick="toggleCollapse('${collapseId}')">
+                    ${monthName}
+                    </td>
+                `;
+                // ${progressText ? `– ${progressText}` : ''}
+                table.appendChild(headerRow);
+
+                // Add hidden container row
+                const containerRow = document.createElement('tr');
+                containerRow.id = collapseId;
+                containerRow.className = 'collapsible-month';
+                containerRow.style.display = 'none';
+
+                // Create nested table for this month's data
+                const innerTable = document.createElement('table');
+                innerTable.style.width = '100%';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <th>Date</th>
+                    <th>Bhavin's Weight</th>
+                    <th>Ridham's Weight</th>
+                    <th>Delete</th>
+                `;
+                innerTable.appendChild(tr);
+
+                entries.forEach(row => {
+                    const [year, month, day] = row.date.split('-').map(Number);
+                    const formattedDate = new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
 
                     const myWeight = row.myWeight !== null ? row.myWeight : "–";
                     const wifeWeight = row.wifeWeight !== null ? row.wifeWeight : "–";
 
-                    const tr = `
-                        <tr>
-                            <td>${formattedDate}</td>
-                            <td>${myWeight}</td>
-                            <td>${wifeWeight}</td>
-                            <td><button onclick="deleteWeight(${row.id})" style="background:#fb5f63;color:white;border:none;padding:8px;width:35px;height:35px;border-radius:50px;cursor:pointer;font-weight:bold;">X</button></td>
-                        </tr>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${myWeight}</td>
+                    <td>${wifeWeight}</td>
+                    <td>
+                        <button onclick="deleteWeight(${row.id})" style="background:#fb5f63; color:white; border:none; padding:8px; width:35px; height:35px; border-radius:50px; cursor:pointer; font-weight:bold;">X</button>
+                    </td>
                     `;
-                    table.innerHTML += tr;
+                    innerTable.appendChild(tr);
+                });
+
+                const td = document.createElement('td');
+                td.colSpan = 4;
+                td.appendChild(innerTable);
+                containerRow.appendChild(td);
+                table.appendChild(containerRow);
                 });
 
                 // Update Graph
@@ -658,6 +733,11 @@
                 // Hide loading icon after data is loaded
                 document.getElementById("loadingOverlay").style.display = "none";
             }
+        }
+
+        function toggleCollapse(id) {
+            const section = document.getElementById(id);
+            section.style.display = section.style.display === 'none' ? 'table-row' : 'none';
         }
 
         function toggleDatasetVisibility(index) {
