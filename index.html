@@ -597,21 +597,21 @@
                     ? (last.wifeWeight - first.wifeWeight).toFixed(1)
                     : null;
 
-                // let progressText = '';
-                // if (bhavinProgress !== null) progressText += `Bhavin: ${bhavinProgress > 0 ? '+' : ''}${bhavinProgress}`;
-                // if (ridhamProgress !== null) {
-                //     if (progressText) progressText += ' ';
-                //     progressText += `Ridham: ${ridhamProgress > 0 ? '+' : ''}${ridhamProgress}`;
-                // }
+                let progressText = '';
+                if (bhavinProgress !== null) progressText += `B ${bhavinProgress > 0 ? '+' : ''}${bhavinProgress}`;
+                if (ridhamProgress !== null) {
+                    if (progressText) progressText += ', ';
+                    progressText += `R ${ridhamProgress > 0 ? '+' : ''}${ridhamProgress}`;
+                }
 
                 // Add month header with progress
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = `
                     <td colspan="4" style="background:#f2f2f2; cursor:pointer; font-weight:bold;" onclick="toggleCollapse('${collapseId}')">
-                    ${monthName}
+                    ${monthName} ${progressText ? ` (${progressText}` : ''})
                     </td>
                 `;
-                // ${progressText ? `– ${progressText}` : ''}
+                
                 table.appendChild(headerRow);
 
                 // Add hidden container row
