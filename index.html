@@ -604,11 +604,18 @@
                     progressText += `R ${ridhamProgress > 0 ? '+' : ''}${ridhamProgress}`;
                 }
 
-                // Add month header with progress
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = `
-                    <td colspan="4" style="background:#f2f2f2; cursor:pointer; font-weight:bold;" onclick="toggleCollapse('${collapseId}')">
-                    ${monthName} ${progressText ? ` (${progressText}` : ''})
+                    <td style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                    ${monthName}
+                    </td>
+
+                    <td style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                    ${progressText ? `${progressText}` : ''}
+                    </td>
+
+                    <td id="collapseArrow${index}" style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:center;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                    →
                     </td>
                 `;
                 
@@ -627,8 +634,8 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <th>Date</th>
-                    <th>Bhavin's Weight</th>
-                    <th>Ridham's Weight</th>
+                    <th>Bhavin</th>
+                    <th>Ridham</th>
                     <th>Delete</th>
                 `;
                 innerTable.appendChild(tr);
@@ -735,9 +742,19 @@
             }
         }
 
-        function toggleCollapse(id) {
-            const section = document.getElementById(id);
-            section.style.display = section.style.display === 'none' ? 'table-row' : 'none';
+        function toggleCollapse(collapseId, arrowId) {
+            const section = document.getElementById(collapseId);
+            const arrow = document.getElementById(arrowId);
+
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'table-row';
+                // section.style.fontWeight = 'bold';
+                arrow.innerText = '↓'; // Opened
+            } else {
+                section.style.display = 'none';
+                // section.style.fontWeight = 'bold';
+                arrow.innerText = '→'; // Collapsed
+            }
         }
 
         function toggleDatasetVisibility(index) {
