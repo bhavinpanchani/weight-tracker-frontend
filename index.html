@@ -420,6 +420,90 @@
                 background-color: white;
                 width: 25%;
             }
+
+            @media (prefers-color-scheme: dark) {
+                #loadingOverlay {
+                    background-color: #121212; /* dark background for dark mode */
+                }
+
+                .spinner {
+                    background: linear-gradient(0deg, #25292c 33%, #007bff 100%);
+                }
+
+                .spinner::after {
+                    background: #121212; /* optional: make center of spinner darker too */
+                }
+
+                body {
+                    background-color: #121212;
+                    color: #f1f1f1;
+                }
+
+                .card {
+                    background-color: #1e1e1e;
+                    color: #f1f1f1;
+                }
+
+                .card > h4 {
+                    color: #f1f1f1;
+                }
+
+                input[type="date"], input[type="number"] {
+                    background-color: #2c2c2c;
+                    color: #f1f1f1;
+                    border: 1px solid #444;
+                }
+
+                .bhavinProgressDivText{
+                    background-color: black;
+                }
+
+                .progress-bar-container {
+                    background-color: #444;
+                }
+
+                .progress-bar {
+                    background-color: #3399ff;
+                }
+
+                .progress-bar-ridham {
+                    background-color: #44d17a;
+                }
+
+                button {
+                    background-color: #333;
+                    color: #f1f1f1;
+                }
+
+                #bhavinBtn {
+                    background-color: #121212;
+                    border-color: #3399ff;
+                    color: #3399ff;
+                }
+
+                #ridhamBtn {
+                    background-color: #121212;
+                    border-color: #44d17a;
+                    color: #44d17a;
+                }
+
+                th {
+                    background-color: #2a2a2a;
+                    color: #f1f1f1;
+                }
+
+                td {
+                    background-color: #1e1e1e;
+                }
+
+                /* .spinner::after {
+                    background: #121212;
+                } */
+
+                .progress-text span {
+                    color: #ffffff;
+                }
+            }
         </style>
     </head>
     <body>
@@ -604,21 +688,26 @@
                     progressText += `R ${ridhamProgress > 0 ? '+' : ''}${ridhamProgress}`;
                 }
 
+                const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const lightHeaderBg = '#f2f2f2';
+                const darkHeaderBg = '#2e2e2e';
+                const headerBg = isDarkMode ? darkHeaderBg : lightHeaderBg;
+
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = `
-                    <td style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
-                    ${monthName}
+                    <td style="background:${headerBg}; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                        ${monthName}
                     </td>
 
-                    <td style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
-                    ${progressText ? `${progressText}` : ''}
+                    <td style="background:${headerBg}; cursor:pointer; font-weight:bold; text-align:left;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                        ${progressText ? `${progressText}` : ''}
                     </td>
 
-                    <td id="collapseArrow${index}" style="background:#f2f2f2; cursor:pointer; font-weight:bold; text-align:center;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
-                    →
+                    <td id="collapseArrow${index}" style="background:${headerBg}; cursor:pointer; font-weight:bold; text-align:center;" onclick="toggleCollapse('${collapseId}', 'collapseArrow${index}')">
+                        →
                     </td>
                 `;
-                
+
                 table.appendChild(headerRow);
 
                 // Add hidden container row
@@ -886,8 +975,8 @@
         const firstEntry = getValidEntry(data.length - 1);
 
         if (!latestEntry || !firstEntry) {
-            document.getElementById("dayOneProgress").innerHTML = "Insufficient data.";
-            document.getElementById("weeklyProgress").innerHTML = "Insufficient data.";
+            document.getElementById("dayOneProgress").innerHTML = "Insufficient data";
+            document.getElementById("weeklyProgress").innerHTML = "Insufficient data";
             return;
         }
 
@@ -901,12 +990,23 @@
                 : "N/A",
         };
 
-        // Apply background color based on positive or negative progress
-        const bhavinDayOneColor = dayOneProgress.bhavinProgress < 0 ? '#d4edda' : '#f8d7da';
-        const ridhamDayOneColor = dayOneProgress.ridhamProgress < 0 ? '#d4edda' : '#f8d7da';
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const lightGreen = '#d4edda';
+        const lightRed = '#f8d7da';
+        const darkGreen = '#1e4620'; // Darker green for dark mode
+        const darkRed = '#5f1a1a';   // Darker red for dark mode
+
+        const bhavinDayOneColor = dayOneProgress.bhavinProgress < 0
+            ? (isDarkMode ? darkGreen : lightGreen)
+            : (isDarkMode ? darkRed : lightRed);
+
+        const ridhamDayOneColor = dayOneProgress.ridhamProgress < 0
+            ? (isDarkMode ? darkGreen : lightGreen)
+            : (isDarkMode ? darkRed : lightRed);
 
         document.getElementById("dayOneProgress").innerHTML = `
-            <div style="background-color:${bhavinDayOneColor}; padding: 6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
+            <div class="bhavinProgressDivText" style="background-color:${bhavinDayOneColor}; padding: 6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
                 Bhavin: ${formatProgress(dayOneProgress.bhavinProgress)}
             </div>
             <div style="background-color:${ridhamDayOneColor}; padding: 6px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;">
@@ -933,8 +1033,13 @@
                     : "N/A",
             };
 
-            const bhavinWeeklyColor = weeklyProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';
-            const ridhamWeeklyColor = weeklyProgress.ridham < 0 ? '#d4edda' : '#f8d7da';
+            const bhavinWeeklyColor = weeklyProgress.bhavin < 0
+                ? (isDarkMode ? darkGreen : lightGreen)
+                : (isDarkMode ? darkRed : lightRed);
+
+            const ridhamWeeklyColor = weeklyProgress.ridham < 0
+                ? (isDarkMode ? darkGreen : lightGreen)
+                : (isDarkMode ? darkRed : lightRed);
 
             document.getElementById("weeklyProgress").innerHTML = `
                 <div style="background-color:${bhavinWeeklyColor}; padding: 6px; border-top-right-radius: 10px; border-top-left-radius: 10px;">
@@ -945,7 +1050,7 @@
                 </div>
             `;
         } else {
-            document.getElementById("weeklyProgress").innerHTML = `Insufficient data for weekly progress.`;
+            document.getElementById("weeklyProgress").innerHTML = `Insufficient data`;
         }
     }
 
@@ -968,7 +1073,7 @@
         });
 
         if (monthData.length < 2) {
-            document.getElementById("currentMonthProgress").innerHTML = "Insufficient data.";
+            document.getElementById("currentMonthProgress").innerHTML = "Insufficient data";
             return;
         }
 
@@ -986,9 +1091,21 @@
                 : "N/A",
         };
 
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const lightGreen = '#d4edda';
+        const lightRed = '#f8d7da';
+        const darkGreen = '#1e4620';
+        const darkRed = '#5f1a1a';
+
         // Determine background color
-        const bhavinColor = monthProgress.bhavin < 0 ? '#d4edda' : '#f8d7da';
-        const ridhamColor = monthProgress.ridham < 0 ? '#d4edda' : '#f8d7da';
+        const bhavinColor = monthProgress.bhavin < 0
+            ? (isDarkMode ? darkGreen : lightGreen)
+            : (isDarkMode ? darkRed : lightRed);
+
+        const ridhamColor = monthProgress.ridham < 0
+            ? (isDarkMode ? darkGreen : lightGreen)
+            : (isDarkMode ? darkRed : lightRed);
 
         // Update UI
         document.getElementById("currentMonthProgress").innerHTML = `
@@ -1121,6 +1238,10 @@
         // Fetch data on page load
         fetchAndUpdate();
 
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            // Reapply theme styles when dark mode changes
+            fetchAndUpdate();  // Re-fetch and update all elements
+        });
     </script>
 
 </body>
