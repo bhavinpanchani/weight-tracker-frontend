@@ -710,11 +710,18 @@
 
                 table.appendChild(headerRow);
 
+                if (index === 0) {
+                    setTimeout(() => {
+                        const arrow = document.getElementById(`collapseArrow${index}`);
+                        if (arrow) arrow.innerText = '↓';
+                    }, 0);
+                }
+
                 // Add hidden container row
                 const containerRow = document.createElement('tr');
                 containerRow.id = collapseId;
                 containerRow.className = 'collapsible-month';
-                containerRow.style.display = 'none';
+                containerRow.style.display = index === 0 ? 'table-row' : 'none';
 
                 // Create nested table for this month's data
                 const innerTable = document.createElement('table');
